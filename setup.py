@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cronhost',
-    version='0.1',
+    version='0.1.2',
     description='Cron Host',
     url='https://github.com/thinknum/cronhost',
     download_url='https://github.com/thinknum/cronhost/archive/0.1.tar.gz',    

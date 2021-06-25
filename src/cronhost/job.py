@@ -2,6 +2,11 @@ import __main__
 import os
 import socket
 from contextdecorator import ContextDecorator
+from exceptions import (
+    GeneralException,
+    AlreadyRunningException,
+    NotAllowedException
+)
 
 
 class job(ContextDecorator):
@@ -13,7 +18,7 @@ class job(ContextDecorator):
         self._cron_id = os.path.basename(__main__.__file__)
 
         if not os.path.isdir(self._pid_path):
-            raise Exception('Invalid pid path')        
+            raise GeneralException('Invalid PID file path')        
 
         self._pid_file = os.path.join(
             self._pid_path,
@@ -22,16 +27,18 @@ class job(ContextDecorator):
 
         if allowed_hosts:
             if not self._check_hosts(allowed_hosts):
-                raise Exception('This job can not be run on this host')
+                raise NotAllowedException(
+                    'This job can not be run on this host'
+                )
 
         if os.path.exists(self._pid_file):
-            raise Exception('Process already running... quitting.')            
+            raise AlreadyRunningException('Process already running. Quitting.')            
 
     def __enter__(self):
         try:
             f = open(self._pid_file, 'w')
         except Exception:
-            raise Exception('Could not open PID file for write')
+            raise GeneralException('Could not open PID file for write')
 
         f.write(self._pid)
         f.close()
@@ -42,7 +49,7 @@ class job(ContextDecorator):
     @classmethod
     def _check_hosts(cls, allowed_hosts):
         if type(allowed_hosts) is not list:
-            raise TypeError('"allowed_hosts" must be a list')
+            raise TypeError('Arguement must be a list: "allowed_hosts"')
 
         allowed_hosts = [host.lower() for host in allowed_hosts]
 
